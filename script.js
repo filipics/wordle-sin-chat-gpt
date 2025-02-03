@@ -1,11 +1,403 @@
-let targetWord = "";
 let currentRow = 0;
 let currentCol = 0;
 const maxAttempts = 6;
 const allowedLetters = "qwertyuiopasdfghjklñzxcvbnm";
 
-// 📌 Lista de palabras cargadas directamente (sin JSON externo)
-let wordList = [
+
+// 📌 Función para eliminar tildes de una palabra
+function removeAccents(word) {
+    return word.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+// 📌 Lista de palabras para elegir la palabra del día
+const wordSelectionList = [
+    "frase",
+    "fuego",
+    "ardor",
+    "garra",
+    "ellos",
+    "depto",
+    "brote",
+    "nacer",
+    "rampa",
+    "calvo",
+    "cacao",
+    "bicho",
+    "forte",
+    "pinto",
+    "chico",
+    "menta",
+    "aviso",
+    "hacia",
+    "saldo",
+    "docto",
+    "pardo",
+    "nieve",
+    "envio",
+    "apaga",
+    "chica",
+    "casar",
+    "cesto",
+    "besos",
+    "tener",
+    "usted",
+    "salsa",
+    "fumar",
+    "notar",
+    "amada",
+    "bajar",
+    "tomar",
+    "islas",
+    "lindo",
+    "oeste",
+    "tulpa",
+    "tribu",
+    "alado",
+    "evita",
+    "actor",
+    "canal",
+    "ganar",
+    "altar",
+    "naves",
+    "actua",
+    "tutor",
+    "vulgo",
+    "clase",
+    "noble",
+    "tropo",
+    "grasa",
+    "bella",
+    "calor",
+    "estar",
+    "otear",
+    "hondo",
+    "tarde",
+    "venir",
+    "playa",
+    "negar",
+    "cofre",
+    "tabla",
+    "monto",
+    "tibio",
+    "error",
+    "mundo",
+    "queso",
+    "jugar",
+    "tigre",
+    "villa",
+    "natal",
+    "trapo",
+    "guapo",
+    "casco",
+    "ducha",
+    "altos",
+    "sobra",
+    "bomba",
+    "bueno",
+    "boton",
+    "opera",
+    "denso",
+    "vimos",
+    "borde",
+    "dobla",
+    "mojar",
+    "retos",
+    "brota",
+    "soplo",
+    "abeto",
+    "hotel",
+    "amiga",
+    "charo",
+    "cabos",
+    "logro",
+    "libro",
+    "serio",
+    "amado",
+    "calma",
+    "bravo",
+    "saber",
+    "carne",
+    "honor",
+    "yemas",
+    "mapas",
+    "feliz",
+    "acoso",
+    "corto",
+    "robar",
+    "justo",
+    "falla",
+    "olivo",
+    "beber",
+    "congo",
+    "vital",
+    "marea",
+    "horno",
+    "remar",
+    "nardo",
+    "flaco",
+    "salir",
+    "tecla",
+    "elote",
+    "cloro",
+    "largo",
+    "pelar",
+    "acudo",
+    "dieta",
+    "vapor",
+    "asado",
+    "solar",
+    "etilo",
+    "lanza",
+    "gente",
+    "ficha",
+    "oruga",
+    "conde",
+    "costo",
+    "coral",
+    "acido",
+    "email",
+    "chile",
+    "indio",
+    "icono",
+    "pobre",
+    "burro",
+    "yerro",
+    "relax",
+    "lucha",
+    "raton",
+    "corre",
+    "ritmo",
+    "musgo",
+    "veloz",
+    "enojo",
+    "fobia",
+    "lento",
+    "optar",
+    "efebo",
+    "rango",
+    "unica",
+    "jaula",
+    "arroz",
+    "lista",
+    "colmo",
+    "termo",
+    "circo",
+    "china",
+    "etica",
+    "blusa",
+    "igual",
+    "pecar",
+    "mando",
+    "traza",
+    "curar",
+    "agudo",
+    "choza",
+    "cable",
+    "alamo",
+    "ecojo",
+    "abuso",
+    "hijas",
+    "fusil",
+    "nariz",
+    "duelo",
+    "fuera",
+    "fondo",
+    "amigo",
+    "exito",
+    "pieza",
+    "enano",
+    "jabon",
+    "desde",
+    "zorro",
+    "tacos",
+    "comer",
+    "imita",
+    "golfo",
+    "echar",
+    "sarta",
+    "abajo",
+    "campo",
+    "viaje",
+    "forma",
+    "avila",
+    "silla",
+    "vidas",
+    "hacer",
+    "aviva",
+    "gafas",
+    "caida",
+    "padre",
+    "torre",
+    "famos",
+    "poder",
+    "piano",
+    "farol",
+    "vibra",
+    "rabia",
+    "vigor",
+    "unico",
+    "grito",
+    "banda",
+    "bombo",
+    "digna",
+    "debil",
+    "exuda",
+    "busca",
+    "ojala",
+    "picar",
+    "pasto",
+    "obvio",
+    "parte",
+    "nueva",
+    "deseo",
+    "tocar",
+    "culpa",
+    "emula",
+    "gaita",
+    "turno",
+    "niños",
+    "crear",
+    "marco",
+    "fatal",
+    "cabra",
+    "clima",
+    "vejez",
+    "orina",
+    "resto",
+    "conta",
+    "bosco",
+    "feria",
+    "catar",
+    "globo",
+    "pedal",
+    "trama",
+    "genio",
+    "rayos",
+    "mujer",
+    "dulce",
+    "cruce",
+    "letra",
+    "sello",
+    "caspa",
+    "cuero",
+    "etapa",
+    "catre",
+    "dueno",
+    "habra",
+    "zafra",
+    "lapiz",
+    "arena",
+    "zarza",
+    "tarta",
+    "basto",
+    "cosas",
+    "suelo",
+    "astro",
+    "votar",
+    "angel",
+    "sacar",
+    "busto",
+    "hijos",
+    "morar",
+    "pegar",
+    "aroma",
+    "celda",
+    "rueda",
+    "alias",
+    "barco",
+    "sobar",
+    "chale",
+    "cejas",
+    "cielo",
+    "atomo",
+    "nadar",
+    "ancho",
+    "ideas",
+    "vario",
+    "cifra",
+    "vacuo",
+    "derbi",
+    "nunca",
+    "oasis",
+    "causa",
+    "medio",
+    "cocer",
+    "vuelo",
+    "cobro",
+    "cruda",
+    "elegi",
+    "color",
+    "dardo",
+    "madre",
+    "cerco",
+    "danza",
+    "azote",
+    "entra",
+    "karma",
+    "yerno",
+    "miedo",
+    "baila",
+    "verde",
+    "acera",
+    "huevo",
+    "usado",
+    "drama",
+    "sapos",
+    "cenar",
+    "mismo",
+    "plata",
+    "latir",
+    "labio",
+    "mitad",
+    "citar",
+    "compa",
+    "osear",
+    "gusto",
+    "tirar",
+    "morir",
+    "galan",
+    "joven",
+    "zanah",
+    "extra",
+    "epoca",
+    "canto",
+    "lugar",
+    "espia",
+    "lavar",
+    "firme",
+    "manos",
+    "golpe",
+    "reina",
+    "donde",
+    "gasto",
+    "rosas",
+    "cebra",
+    "quien",
+    "habil",
+    "cunas",
+    "renta",
+    "pagar",
+    "union",
+    "dedos",
+    "doble",
+    "sabor",
+    "junto",
+    "verbo",
+    "cerca",
+    "cinta",
+    "harto",
+    "abeja",
+    "abril",
+    "acaba",
+    "acero",
+    "adios",
+    "afila",
+    "agita",
+    "albor"
+  ];
+
+// 📌 Lista de palabras válidas para la validación
+const wordValidationList = [
     "abacá",
     "ábaco",
     "abada",
@@ -17012,35 +17404,32 @@ let wordList = [
     "zuras",
     "zuros",
     "zuzos"
-  ]
-
-// 📌 Agregar eventos a los botones de "Enter" y "Backspace"
-document.getElementById("enter-btn").addEventListener("click", () => handleKeyPress("Enter"));
-document.getElementById("backspace-btn").addEventListener("click", () => handleKeyPress("Backspace"));
+  ].map(word => removeAccents(word));  // 📌 Eliminar tildes de la lista al inicio
 
 
-  // 📌 Función para eliminar tildes de una palabra
-function removeAccents(word) {
-    return word.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
+let targetWord = "";  // Palabra del día
 
-// 📌 Seleccionar una palabra aleatoria de 5 letras y quitarle la tilde
-function fetchWord() {
-    const wordsOfFiveLetters = wordList.filter(word => word.length === 5); // Solo palabras de 5 letras
+
+/// 📌 Seleccionar una palabra aleatoria de `wordSelectionList`
+function selectRandomWord() {
+    const wordsOfFiveLetters = wordSelectionList.filter(word => word.length === 5);
     if (wordsOfFiveLetters.length > 0) {
         const randomIndex = Math.floor(Math.random() * wordsOfFiveLetters.length);
-        targetWord = removeAccents(wordsOfFiveLetters[randomIndex]);
+        targetWord = wordsOfFiveLetters[randomIndex];
         console.log(`🎯 Palabra del día: ${targetWord}`);
     } else {
-        console.error("❌ No hay palabras de 5 letras.");
-        targetWord = "perro"; // 📌 Palabra de respaldo
+        console.error("❌ No hay palabras de 5 letras en la lista.");
+        targetWord = "perro";  // 📌 Palabra de respaldo
     }
 }
 
-// 📌 Validar si la palabra ingresada está en la lista
+
+
+// 📌 Validar si la palabra ingresada está en `wordValidationList`
 function validateWord(word) {
-    return wordList.includes(word.toLowerCase());
+    return wordValidationList.includes(removeAccents(word.toLowerCase()));
 }
+
 
 // 📌 Reiniciar el juego
 function resetGame() {
@@ -17053,7 +17442,7 @@ function resetGame() {
 
     generateGrid();
     generateKeyboard();
-    fetchWord();
+    selectRandomWord();
 }
 
 // 📌 Generar el tablero de juego
@@ -17089,7 +17478,7 @@ function generateKeyboard() {
         keyboard.appendChild(rowDiv);
     });
 
-    // 📌 Crear la fila de "Backspace" y "Enter" debajo del teclado
+    // 📌 Crear la fila de "Backspace" y "Enter" dentro del teclado
     const extraRow = document.createElement("div");
     extraRow.classList.add("keyboard-row");
 
@@ -17097,23 +17486,38 @@ function generateKeyboard() {
     backspaceKey.classList.add("key", "key-special");
     backspaceKey.textContent = "←";
     backspaceKey.id = "key-backspace";
-    backspaceKey.addEventListener("click", () => handleKeyPress("Backspace"));
+    extraRow.appendChild(backspaceKey);
 
     const enterKey = document.createElement("div");
     enterKey.classList.add("key", "key-special");
     enterKey.textContent = "Enter";
     enterKey.id = "key-enter";
-    enterKey.addEventListener("click", () => handleKeyPress("Enter"));
-
-    extraRow.appendChild(backspaceKey);
     extraRow.appendChild(enterKey);
+
     keyboard.appendChild(extraRow);
+
+    // 📌 Asignar eventos después de que los elementos han sido creados
+    document.getElementById("key-backspace").addEventListener("click", () => handleKeyPress("Backspace"));
+    document.getElementById("key-enter").addEventListener("click", () => handleKeyPress("Enter"));
 }
+
 
 // 📌 Manejo de entrada del teclado
 document.addEventListener("keydown", function(event) {
     handleKeyPress(event.key);
 });
+
+// 📌 Función para mostrar mensajes al usuario
+function showMessage(text) {
+    const messageElement = document.getElementById("message");
+    if (!messageElement) return; // Evita errores si no existe el elemento en el HTML
+    
+    messageElement.textContent = text;
+    setTimeout(() => {
+        messageElement.textContent = "";
+    }, 2000);
+}
+
 
 function handleKeyPress(key) {
     key = key.toLowerCase();
@@ -17158,35 +17562,47 @@ function checkWord() {
 // 📌 Procesar la palabra correctamente
 function processWord(inputWord) {
     let gridCells = document.querySelectorAll(".cell");
-    let letterCount = {};
+    let letterCount = {};  // Almacena cuántas veces aparece cada letra en targetWord
 
-    for (let i = 0; i < 5; i++) {
-        letterCount[targetWord[i]] = (letterCount[targetWord[i]] || 0) + 1;
+    // 📌 Contar la cantidad de cada letra en la palabra del día
+    for (let letter of targetWord) {
+        letterCount[letter] = (letterCount[letter] || 0) + 1;
     }
 
-    for (let i = 0; i < 5; i++) {
-        let cell = gridCells[currentRow * 5 + i];
+    let tempLetterCount = { ...letterCount };  // Copia para la verificación de amarillo
+
+    // 📌 Primera pasada: marcar letras correctas (verde)
+    for (let i = 0; i < inputWord.length; i++) {
+        let cell = gridCells[currentRow * inputWord.length + i];
         let letter = inputWord[i];
         let key = document.getElementById(`key-${letter}`);
 
         if (letter === targetWord[i]) {
             cell.classList.add("correct");
-            key.classList.add("correct");
-            letterCount[letter]--;
-        } else if (targetWord.includes(letter) && letterCount[letter] > 0) {
-            cell.classList.add("present");
-            if (!key.classList.contains("correct")) {
-                key.classList.add("present");
-            }
-            letterCount[letter]--;
-        } else {
-            if (!key.classList.contains("correct") && !key.classList.contains("present")) {
+            updateKeyColor(key, "correct");
+            tempLetterCount[letter]--;
+        }
+    }
+
+    // 📌 Segunda pasada: marcar letras presentes (amarillo) respetando la cantidad disponible en `targetWord`
+    for (let i = 0; i < inputWord.length; i++) {
+        let cell = gridCells[currentRow * inputWord.length + i];
+        let letter = inputWord[i];
+        let key = document.getElementById(`key-${letter}`);
+
+        if (!cell.classList.contains("correct")) {
+            if (targetWord.includes(letter) && tempLetterCount[letter] > 0) {
+                cell.classList.add("present");
+                updateKeyColor(key, "present");
+                tempLetterCount[letter]--;
+            } else {
                 cell.classList.add("absent");
-                key.classList.add("absent");
+                updateKeyColor(key, "absent");  // 📌 Asegurar que la letra se pone en gris en el teclado
             }
         }
     }
 
+    // 📌 Verificar si el usuario ganó
     if (inputWord === targetWord) {
         showMessage("🎉 ¡Ganaste!");
     } else if (currentRow === maxAttempts - 1) {
@@ -17197,15 +17613,31 @@ function processWord(inputWord) {
     currentCol = 0;
 }
 
-// 📌 Mostrar mensaje al usuario
-function showMessage(text) {
-    document.getElementById("message").textContent = text;
-    setTimeout(() => {
-        document.getElementById("message").textContent = "";
-    }, 2000);
+
+// 📌 Función para actualizar el color del teclado con prioridad (gris < amarillo < verde)
+function updateKeyColor(key, newStatus) {
+    if (!key) return; // Si no existe la tecla, salir
+
+    const currentStatus = key.classList.contains("correct")
+        ? "correct"
+        : key.classList.contains("present")
+        ? "present"
+        : key.classList.contains("absent")
+        ? "absent"
+        : "unused";  // Por defecto, las teclas empiezan sin usarse (negro)
+
+    // 📌 Definir la prioridad de colores (negro < gris < amarillo < verde)
+    const priority = { "unused": 0, "absent": 1, "present": 2, "correct": 3 };
+
+    // 📌 Si la nueva clasificación es mejor, actualizar
+    if (priority[newStatus] > priority[currentStatus]) {
+        key.classList.remove("correct", "present", "absent", "unused");
+        key.classList.add(newStatus);
+    }
 }
 
+
 // 📌 Iniciar el juego
-fetchWord();
+selectRandomWord();
 generateGrid();
 generateKeyboard();
