@@ -17069,7 +17069,6 @@ function generateGrid() {
     }
 }
 
-// 📌 Generar el teclado en pantalla
 function generateKeyboard() {
     const keyboard = document.getElementById("keyboard");
     keyboard.innerHTML = "";
@@ -17089,6 +17088,26 @@ function generateKeyboard() {
         });
         keyboard.appendChild(rowDiv);
     });
+
+    // 📌 Crear la fila de "Backspace" y "Enter" debajo del teclado
+    const extraRow = document.createElement("div");
+    extraRow.classList.add("keyboard-row");
+
+    const backspaceKey = document.createElement("div");
+    backspaceKey.classList.add("key", "key-special");
+    backspaceKey.textContent = "←";
+    backspaceKey.id = "key-backspace";
+    backspaceKey.addEventListener("click", () => handleKeyPress("Backspace"));
+
+    const enterKey = document.createElement("div");
+    enterKey.classList.add("key", "key-special");
+    enterKey.textContent = "Enter";
+    enterKey.id = "key-enter";
+    enterKey.addEventListener("click", () => handleKeyPress("Enter"));
+
+    extraRow.appendChild(backspaceKey);
+    extraRow.appendChild(enterKey);
+    keyboard.appendChild(extraRow);
 }
 
 // 📌 Manejo de entrada del teclado
