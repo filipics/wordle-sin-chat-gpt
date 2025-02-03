@@ -17014,7 +17014,12 @@ let wordList = [
     "zuzos"
   ]
 
-// 📌 Función para eliminar tildes de una palabra
+// 📌 Agregar eventos a los botones de "Enter" y "Backspace"
+document.getElementById("enter-btn").addEventListener("click", () => handleKeyPress("Enter"));
+document.getElementById("backspace-btn").addEventListener("click", () => handleKeyPress("Backspace"));
+
+
+  // 📌 Función para eliminar tildes de una palabra
 function removeAccents(word) {
     return word.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
