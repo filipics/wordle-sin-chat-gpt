@@ -18442,6 +18442,128 @@ function updateKeyColor(key, newStatus) {
         key.classList.add(newStatus);
     }
 }
+// 📌 Función para registrar el resultado de la partida en localStorage
+function saveGameResult(won, attempts) {
+    let gameHistory = JSON.parse(localStorage.getItem("gameHistory")) || [];
+
+    // 📌 Crear un nuevo registro
+    let gameRecord = {
+        date: new Date().toLocaleDateString(),
+        word: targetWord,
+        attempts: won ? attempts : "X", // "X" si perdió
+        result: won ? "Ganó" : "Perdió"
+    };
+
+    gameHistory.push(gameRecord);
+    localStorage.setItem("gameHistory", JSON.stringify(gameHistory));
+
+    updateHistoryDisplay(); // 📌 Actualizar la vista del historial
+}
+
+// 📌 Función para alternar la visibilidad del historial
+function toggleHistory() {
+    let historyContainer = document.getElementById("history");
+    if (historyContainer.style.display === "none") {
+        historyContainer.style.display = "block"; // Mostrar historial
+        updateHistoryDisplay(); // Asegurar que se actualice cuando se muestra
+    } else {
+        historyContainer.style.display = "none"; // Ocultar historial
+    }
+}
+
+// 📌 Agregar evento al botón para mostrar el historial al hacer clic
+document.getElementById("toggle-history").addEventListener("click", toggleHistory);
+
+// 📌 Función para mostrar el historial en pantalla cuando se active
+function updateHistoryDisplay() {
+    let historyContainer = document.getElementById("history");
+    let gameHistory = JSON.parse(localStorage.getItem("gameHistory")) || [];
+    
+    historyContainer.innerHTML = "<h3>Historial de Partidas</h3>";
+    
+    if (gameHistory.length === 0) {
+        historyContainer.innerHTML += "<p>Aún no hay partidas registradas.</p>";
+        return;
+    }
+
+    // 📌 Mostrar solo las últimas 10 partidas
+    gameHistory.slice(-100).forEach(game => {
+        let entry = document.createElement("p");
+        entry.textContent = `${game.date}: ${game.word} - ${game.result} en ${game.attempts} intentos`;
+        historyContainer.appendChild(entry);
+    });
+}
+
+// 📌 Función para mostrar el historial en pantalla
+function updateHistoryDisplay() {
+    let historyContainer = document.getElementById("history");
+    if (!historyContainer) return; // Si no existe el contenedor, salir
+
+    let gameHistory = JSON.parse(localStorage.getItem("gameHistory")) || [];
+    
+    // 📌 Mostrar solo las últimas 10 partidas
+    historyContainer.innerHTML = "<h3>Historial de Partidas</h3>";
+    gameHistory.slice(-10).forEach(game => {
+        let entry = document.createElement("p");
+        entry.textContent = `${game.date}: ${game.word} - ${game.result} en ${game.attempts} intentos`;
+        historyContainer.appendChild(entry);
+    });
+}
+
+// 📌 Modificar `processWord()` para guardar la partida al terminar
+function processWord(inputWord) {
+    let gridCells = document.querySelectorAll(".cell");
+    let letterCount = {}; 
+
+    for (let letter of targetWord) {
+        letterCount[letter] = (letterCount[letter] || 0) + 1;
+    }
+
+    let tempLetterCount = { ...letterCount };
+
+    for (let i = 0; i < inputWord.length; i++) {
+        let cell = gridCells[currentRow * inputWord.length + i];
+        let letter = inputWord[i];
+        let key = document.getElementById(`key-${letter}`);
+
+        if (letter === targetWord[i]) {
+            cell.classList.add("correct");
+            updateKeyColor(key, "correct");
+            tempLetterCount[letter]--;
+        }
+    }
+
+    for (let i = 0; i < inputWord.length; i++) {
+        let cell = gridCells[currentRow * inputWord.length + i];
+        let letter = inputWord[i];
+        let key = document.getElementById(`key-${letter}`);
+
+        if (!cell.classList.contains("correct")) {
+            if (targetWord.includes(letter) && tempLetterCount[letter] > 0) {
+                cell.classList.add("present");
+                updateKeyColor(key, "present");
+                tempLetterCount[letter]--;
+            } else {
+                cell.classList.add("absent");
+                updateKeyColor(key, "absent");
+            }
+        }
+    }
+
+    if (inputWord === targetWord) {
+        showMessage("🎉 ¡Ganaste!");
+        saveGameResult(true, currentRow + 1);
+    } else if (currentRow === maxAttempts - 1) {
+        document.getElementById("reveal-word").textContent = `La palabra era: ${targetWord.toUpperCase()}`;
+        saveGameResult(false, currentRow + 1);
+    }
+
+    currentRow++;
+    currentCol = 0;
+}
+
+// 📌 Llamar a `updateHistoryDisplay()` al iniciar para cargar historial previo
+updateHistoryDisplay();
 
 
 // 📌 Iniciar el juego
