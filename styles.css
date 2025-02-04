@@ -82,3 +82,64 @@ header {
 .key-special {
     width: 80px; /* Enter y Backspace más grandes */
 }
+
+.button {
+    width: 150px;
+    height: 50px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 50px;
+    cursor: pointer;
+    border-radius: 8px;
+    border: none;
+    background-color: #222;
+    color: white;
+    margin: 5px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+
+/* 📌 Efecto de presionado */
+.button:active {
+    background-color: #555;
+    transform: scale(0.95);
+}
+
+/* 📌 Efecto de hover */
+.button:hover {
+    background-color: #444;
+    transform: scale(1.05);
+}
+
+/* 📌 Media queries para móviles */
+@media (max-width: 480px) {
+    #game-container {
+        width: 95%;
+    }
+
+    .button {
+        width: 130px;
+        height: 45px;
+        font-size: 16px;
+        line-height: 45px;
+    }
+
+    .cell {
+        width: 60px;
+        height: 60px;
+        font-size: 20px;
+        line-height: 40px;
+    }
+
+    .key {
+        width: 30px;
+        height: 40px;
+        font-size: 16px;
+        line-height: 40px;
+    }
+
+    .key-special {
+        width: 60px;
+    }
+}
