@@ -18223,7 +18223,7 @@ function selectRandomWord() {
     if (wordsOfFiveLetters.length > 0) {
         const randomIndex = Math.floor(Math.random() * wordsOfFiveLetters.length);
         targetWord = wordsOfFiveLetters[randomIndex];
-        console.log(`🎯 Palabra del día: ${targetWord}`);
+        
     } else {
         console.error("❌ No hay palabras de 5 letras en la lista.");
         targetWord = "perro";  // 📌 Palabra de respaldo
