@@ -18217,17 +18217,28 @@ const wordValidationList = [
 let targetWord = "";  // Palabra del día
 
 
-/// 📌 Seleccionar una palabra aleatoria de `wordSelectionList`
+// 📌 Seleccionar una palabra aleatoria basada en la fecha
 function selectRandomWord() {
-    const wordsOfFiveLetters = wordSelectionList.filter(word => word.length === 5);
-    if (wordsOfFiveLetters.length > 0) {
-        const randomIndex = Math.floor(Math.random() * wordsOfFiveLetters.length);
-        targetWord = wordsOfFiveLetters[randomIndex];
-        
-    } else {
-        console.error("❌ No hay palabras de 5 letras en la lista.");
-        targetWord = "perro";  // 📌 Palabra de respaldo
-    }
+  const wordsOfFiveLetters = wordSelectionList.filter(word => word.length === 5);
+
+  if (wordsOfFiveLetters.length > 0) {
+      // 📌 Generar una "semilla" única basada en la fecha actual
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth() + 1; // Meses van de 0 a 11, sumamos 1
+      const day = today.getDate();
+      
+      // 📌 Crear un número único basado en la fecha (YYYYMMDD)
+      const seed = year * 10000 + month * 100 + day;
+      
+      // 📌 Usar la semilla para elegir una palabra de la lista
+      const randomIndex = seed % wordsOfFiveLetters.length;
+      targetWord = wordsOfFiveLetters[randomIndex];
+
+  } else {
+      console.error("❌ No hay palabras de 5 letras en la lista.");
+      targetWord = "perro";  // 📌 Palabra de respaldo
+  }
 }
 
 
