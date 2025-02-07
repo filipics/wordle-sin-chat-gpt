@@ -1,7 +1,52 @@
 let currentRow = 0;
 let currentCol = 0;
+let guessedWords = []; // 📌 Lista para almacenar las palabras que el usuario ha intentado
+
+let isDailyMode = false; // 📌 Empieza en "Modo Normal"
 const maxAttempts = 6;
 const allowedLetters = "qwertyuiopasdfghjklñzxcvbnm";
+
+
+function loadDailyGameState() {
+  const savedGame = JSON.parse(localStorage.getItem("dailyGameState"));
+  if (savedGame && savedGame.lastPlayedDate === new Date().toDateString()) {
+      guessedWords = savedGame.guessedWords || [];
+      currentRow = savedGame.currentRow || 0;
+
+      // 📌 Restaurar el tablero con letras y colores
+      const cells = document.querySelectorAll(".cell");
+      savedGame.boardState.forEach((cellData, index) => {
+          cells[index].innerText = cellData.letter;
+          cells[index].classList.remove("correct", "present", "absent");
+          if (cellData.class) {
+              cells[index].classList.add(cellData.class);
+          }
+      });
+
+      // 📌 Restaurar el teclado con los colores previos
+      const keys = document.querySelectorAll(".key");
+      savedGame.keyboardState.forEach(keyData => {
+          const keyElement = document.getElementById(`key-${keyData.letter}`);
+          if (keyElement) {
+              keyElement.classList.remove("correct", "present", "absent");
+              if (keyData.class) {
+                  keyElement.classList.add(keyData.class);
+              }
+          }
+      });
+
+      console.log("📌 Se cargó el juego diario guardado con colores y teclado.");
+
+      // 📌 Bloquear el teclado si el juego ya terminó
+      if (savedGame.currentRow >= maxAttempts || guessedWords.includes(targetWord)) {
+          document.querySelectorAll(".key").forEach(key => key.style.pointerEvents = "none");
+      }
+
+      return true; // Indica que el jugador ya jugó hoy y se ha restaurado el estado
+  }
+  return false;
+}
+
 
 
 // 📌 Función para eliminar tildes de una palabra
@@ -18217,29 +18262,81 @@ const wordValidationList = [
 let targetWord = "";  // Palabra del día
 
 
-// 📌 Seleccionar una palabra aleatoria basada en la fecha
 function selectRandomWord() {
   const wordsOfFiveLetters = wordSelectionList.filter(word => word.length === 5);
 
   if (wordsOfFiveLetters.length > 0) {
-      // 📌 Generar una "semilla" única basada en la fecha actual
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = today.getMonth() + 1; // Meses van de 0 a 11, sumamos 1
-      const day = today.getDate();
-      
-      // 📌 Crear un número único basado en la fecha (YYYYMMDD)
-      const seed = year * 10000 + month * 100 + day;
-      
-      // 📌 Usar la semilla para elegir una palabra de la lista
-      const randomIndex = seed % wordsOfFiveLetters.length;
-      targetWord = wordsOfFiveLetters[randomIndex];
+      if (isDailyMode) {
+          // 📌 Revisar si ya hay una palabra del día guardada en `localStorage`
+          const savedDailyWord = localStorage.getItem("dailyWord");
+          const lastPlayedDate = localStorage.getItem("lastPlayedDate");
+          const todayDate = new Date().toDateString();
 
+          if (savedDailyWord && lastPlayedDate === todayDate) {
+              // 📌 Si ya hay una palabra guardada para hoy, usamos esa y no cambiamos nada
+              targetWord = savedDailyWord;
+          } else {
+              // 📌 Si no hay palabra guardada, elegir una y guardarla
+              const today = new Date();
+              const year = today.getFullYear();
+              const month = today.getMonth() + 1;
+              const day = today.getDate();
+              const seed = year * 10000 + month * 100 + day;
+              const randomIndex = seed % wordsOfFiveLetters.length;
+              targetWord = wordsOfFiveLetters[randomIndex];
+
+              // 📌 Guardamos la palabra del día para que no cambie
+              localStorage.setItem("dailyWord", targetWord);
+              localStorage.setItem("lastPlayedDate", todayDate);
+          }
+      } else {
+          // 📌 Modo Normal: Elegir palabra aleatoria
+          const randomIndex = Math.floor(Math.random() * wordsOfFiveLetters.length);
+          targetWord = wordsOfFiveLetters[randomIndex];
+      }
   } else {
       console.error("❌ No hay palabras de 5 letras en la lista.");
-      targetWord = "perro";  // 📌 Palabra de respaldo
+      targetWord = "perro"; // 📌 Palabra de respaldo
   }
 }
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("modeToggle").addEventListener("click", function () {
+      isDailyMode = !isDailyMode; // 📌 Alternar entre los modos
+      this.textContent = isDailyMode ? "Modo Diario" : "Modo Normal"; // 📌 Cambiar el texto del botón
+
+      if (isDailyMode) {
+          // 📌 Si volvemos al Modo Diario, NO debemos resetear si ya jugó
+          const savedDailyWord = localStorage.getItem("dailyWord");
+          if (savedDailyWord) {
+              targetWord = savedDailyWord;
+          }
+
+          // 📌 Cargar estado del juego solo si ya había un juego guardado
+          if (loadDailyGameState()) {
+              console.log("📌 Se restauró el estado del juego diario.");
+              return; // 📌 No reiniciar el juego
+          }
+      }
+
+      selectRandomWord(); // 📌 Seleccionar palabra si es necesario
+      resetGame(); // 📌 Reiniciar solo si es necesario
+  });
+
+  // 📌 Asegurar que la palabra del día se mantiene fija
+  const savedDailyWord = localStorage.getItem("dailyWord");
+  if (isDailyMode && savedDailyWord) {
+      targetWord = savedDailyWord;
+  }
+
+  selectRandomWord(); // 📌 Seleccionar una palabra al cargar la página
+});
+
+
 
 
 
@@ -18461,7 +18558,7 @@ function saveGameResult(won, attempts) {
     let gameRecord = {
         date: new Date().toLocaleDateString(),
         word: targetWord,
-        attempts: won ? attempts : "X", // "X" si perdió
+        attempts: won ? attempts : "6", // "6" si perdió
         result: won ? "Ganó" : "Perdió"
     };
 
@@ -18571,7 +18668,44 @@ function processWord(inputWord) {
 
     currentRow++;
     currentCol = 0;
+
+    saveDailyGameState(); // 📌 Guardar el estado del juego después de cada intento en Modo Diario
 }
+
+function saveDailyGameState() {
+  if (isDailyMode) {
+      const cells = document.querySelectorAll(".cell");
+
+      // 📌 Guardar el contenido y la clase de cada celda (para los colores)
+      const boardState = Array.from(cells).map(cell => ({
+          letter: cell.innerText,
+          class: cell.classList.contains("correct") ? "correct" :
+                 cell.classList.contains("present") ? "present" :
+                 cell.classList.contains("absent") ? "absent" : ""
+      }));
+
+      // 📌 Guardar el estado del teclado (colores de las teclas)
+      const keys = document.querySelectorAll(".key");
+      const keyboardState = Array.from(keys).map(key => ({
+          letter: key.innerText.toLowerCase(),
+          class: key.classList.contains("correct") ? "correct" :
+                 key.classList.contains("present") ? "present" :
+                 key.classList.contains("absent") ? "absent" : ""
+      }));
+
+      const gameState = {
+          guessedWords: guessedWords, // 📌 Palabras ingresadas
+          currentRow: currentRow, // 📌 Fila actual
+          boardState: boardState, // 📌 Estado del tablero con colores
+          keyboardState: keyboardState, // 📌 Estado del teclado con colores
+          lastPlayedDate: new Date().toDateString() // 📌 Guardamos la fecha
+      };
+
+      localStorage.setItem("dailyGameState", JSON.stringify(gameState));
+  }
+}
+
+
 
 // 📌 Llamar a `updateHistoryDisplay()` al iniciar para cargar historial previo
 updateHistoryDisplay();
